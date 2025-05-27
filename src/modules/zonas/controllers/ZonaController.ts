@@ -144,6 +144,15 @@ export class ZonaController {
         message: 'Zona actualizada exitosamente',
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('No se encontró la zona')) {
+        reply.code(404).send({
+          success: false,
+          error: 'Zona no encontrada',
+          message: error.message,
+        });
+        return;
+      }
+
       if (error instanceof Error && error.message.includes('Ya existe')) {
         reply.code(409).send({
           success: false,
@@ -190,6 +199,15 @@ export class ZonaController {
         message: 'Zona eliminada exitosamente',
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('No se encontró la zona')) {
+        reply.code(404).send({
+          success: false,
+          error: 'Zona no encontrada',
+          message: error.message,
+        });
+        return;
+      }
+
       reply.code(500).send({
         success: false,
         error: 'Error interno del servidor',
