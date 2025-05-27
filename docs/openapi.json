@@ -1,0 +1,562 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Envíos Internacionales API",
+    "description": "API REST para gestión de envíos internacionales - Módulo de Zonas",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Equipo de Desarrollo",
+      "email": "dev@envios-internacionales.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de desarrollo"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Verifica el estado del servidor y la conexión a la base de datos",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "Servidor funcionando correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "database": {
+                      "type": "string",
+                      "enum": ["connected", "disconnected"]
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/zonas": {
+      "get": {
+        "summary": "Obtener todas las zonas",
+        "description": "Retorna una lista de todas las zonas registradas",
+        "tags": ["Zonas"],
+        "responses": {
+          "200": {
+            "description": "Lista de zonas obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZonasResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear una nueva zona",
+        "description": "Crea una nueva zona en el sistema",
+        "tags": ["Zonas"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateZonaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Zona creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZonaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto - Ya existe una zona con el mismo código",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/zonas/active": {
+      "get": {
+        "summary": "Obtener zonas activas",
+        "description": "Retorna una lista de todas las zonas activas",
+        "tags": ["Zonas"],
+        "responses": {
+          "200": {
+            "description": "Lista de zonas activas obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZonasResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/zonas/{id}": {
+      "get": {
+        "summary": "Obtener zona por ID",
+        "description": "Retorna una zona específica por su ID",
+        "tags": ["Zonas"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "ID único de la zona"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zona obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZonaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Zona no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar zona",
+        "description": "Actualiza una zona existente",
+        "tags": ["Zonas"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "ID único de la zona"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateZonaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Zona actualizada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZonaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Zona no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto - Ya existe otra zona con el mismo código",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar zona",
+        "description": "Elimina una zona del sistema",
+        "tags": ["Zonas"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "ID único de la zona"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zona eliminada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Zona eliminada exitosamente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Zona no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Zona": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID único de la zona"
+          },
+          "nombre": {
+            "type": "string",
+            "description": "Nombre de la zona"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código único de la zona"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "description": "Descripción opcional de la zona"
+          },
+          "activa": {
+            "type": "boolean",
+            "description": "Indica si la zona está activa"
+          },
+          "fechaCreacion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación de la zona"
+          },
+          "fechaActualizacion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de última actualización de la zona"
+          }
+        },
+        "required": ["id", "nombre", "codigo", "activa", "fechaCreacion", "fechaActualizacion"]
+      },
+      "CreateZonaRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "description": "Nombre de la zona",
+            "example": "América del Norte"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código único de la zona",
+            "example": "NA"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "description": "Descripción opcional de la zona",
+            "example": "Zona que incluye Estados Unidos, Canadá y México"
+          },
+          "activa": {
+            "type": "boolean",
+            "description": "Indica si la zona está activa",
+            "default": true,
+            "example": true
+          }
+        },
+        "required": ["nombre", "codigo"]
+      },
+      "UpdateZonaRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "description": "Nombre de la zona",
+            "example": "América del Norte"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código único de la zona",
+            "example": "NA"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "description": "Descripción opcional de la zona",
+            "example": "Zona que incluye Estados Unidos, Canadá y México"
+          },
+          "activa": {
+            "type": "boolean",
+            "description": "Indica si la zona está activa",
+            "example": true
+          }
+        }
+      },
+      "ZonaResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Zona"
+          },
+          "message": {
+            "type": "string",
+            "example": "Zona obtenida exitosamente"
+          }
+        }
+      },
+      "ZonasResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Zona"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "Zonas obtenidas exitosamente"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Error interno del servidor"
+          },
+          "message": {
+            "type": "string",
+            "example": "Descripción del error"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Datos de entrada inválidos"
+          },
+          "message": {
+            "type": "string",
+            "example": "Los datos proporcionados no son válidos"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["El nombre es requerido y debe ser una cadena no vacía"]
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Endpoints para verificar el estado del servidor"
+    },
+    {
+      "name": "Zonas",
+      "description": "Gestión de zonas geográficas para envíos internacionales"
+    }
+  ]
+} 
